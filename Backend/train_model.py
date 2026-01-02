@@ -45,6 +45,7 @@ stopwords=set(stopwords.words("english"))
 
 def clean_function(text):
     text=text.lower()
+    text = text.replace('subject', '') 
     text=word_tokenize(text)
     text=[t for t in text if t not in stopwords]
     text=[t for t in text if t not in punctuation]
@@ -90,10 +91,12 @@ test_sequences = pad_sequences(test_seq, maxlen=max_len, padding='post', truncat
 vocab_size = len(tokenizer.word_index) + 1
 
 model = tf.keras.models.Sequential([
-    # vocab_size tells the AI how many unique words it needs to know
     tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=32, input_length=max_len),
-    tf.keras.layers.LSTM(16),
+    # Add 'recurrent_dropout' to make the LSTM less "stubborn"
+    tf.keras.layers.LSTM(16, dropout=0.2, recurrent_dropout=0.2), 
     tf.keras.layers.Dense(32, activation='relu'),
+    # Add a Dropout layer to prevent the model from over-relying on single words
+    tf.keras.layers.Dropout(0.5), 
     tf.keras.layers.Dense(1, activation='sigmoid') 
 ])
 
